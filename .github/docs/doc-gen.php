@@ -567,6 +567,7 @@ function frontMatter(): array
 {
     return [
         'title' => 'Documentation',
+        'navigation.title' => 'Documentation',
     ];
 }
 

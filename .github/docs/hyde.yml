@@ -1,10 +1,12 @@
 hyde:
     output_directories:
-        documentation-page: ''
+        Hyde\Pages\DocumentationPage: ''
     load_app_styles_from_cdn: true
     pretty_urls: true
 
 docs:
     sidebar:
-        header: 'Number Documentation'
+        header: 'PHP Number Utility'
         footer: '[https://github.com/FriendsOfPHP/number](GitHub Source Code)'
+    table_of_contents:
+      max_heading_level: 3
