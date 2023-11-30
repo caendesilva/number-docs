@@ -612,7 +612,7 @@ if (in_array('--output', $argv)) {
     echo $generator->getMarkdown() . "\n\n";
 }
 
-echo sprintf("\033[32mAll done!\033[0m Generated in: %sms\n", Number::format((microtime(true) - $timeStart) * 1000));
+echo sprintf("\033[32mAll done!\033[0m Generated in: %sms (SHA1: %s)\n", Number::format((microtime(true) - $timeStart) * 1000), sha1($generator->getMarkdown()));
 
 if ($errors) {
     exit(1);
