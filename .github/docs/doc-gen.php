@@ -39,8 +39,25 @@ class DocumentationGenerator
     protected function assembleDocument(): void {
         $this->addBlock(
             new MarkdownBlock(
-                new MarkdownHeading('Number', 1),
-                'PHP Number Utility'
+                new MarkdownHeading($this->readme->title, 1),
+                $this->readme->description
+            )
+        );
+
+        $this->addBlock(
+            new MarkdownBlock(
+                new MarkdownHeading('Installation', 2),
+                $this->generateInstallationMarkdown(),
+            )
+        );
+
+        $this->addBlock(
+            new MarkdownBlock(
+                new MarkdownHeading('Basic Usage', 2),
+                [
+                    'The Number package provides a single class, `Number`, which can be used to format numbers in a variety of ways. Here are some example, with the full reference below.',
+                    $this->readme->getBlock('basic-usage')->getContent(),
+                ]
             )
         );
     }
@@ -52,9 +69,23 @@ class DocumentationGenerator
     protected function addBlock(MarkdownBlock $block): void {
         $this->markdownSections[] = $block;
     }
+
+    protected function generateInstallationMarkdown(): string
+    {
+        return implode("\n\n", [
+            'Install the package using Composer:',
+            new MarkdownCodeBlock("composer require {$this->composerData['name']}", 'bash'),
+        ]);
+    }
 }
 
-/** @internal Data object for the Readme */
+/**
+ * @internal Data object for the Readme
+ * @property-read string $title
+ * @property-read string $description
+ * @property-read string $license
+ * @property-read string $attributions
+ */
 class ReadmeData
 {
     protected readonly string $contents;
@@ -68,6 +99,16 @@ class ReadmeData
         $this->lines = explode("\n", $this->contents);
         $this->parseReadme();
         $this->parseData();
+    }
+
+    public function __get(string $name)
+    {
+        return $this->data[$name] ?? null;
+    }
+
+    public function getBlock(string $id): MarkdownBlock
+    {
+        return $this->blocks[$id];
     }
 
     protected function parseReadme(): void
@@ -121,11 +162,6 @@ class ReadmeData
         $this->data['license'] = $this->blocks['license']->getContent();
         $this->data['attributions'] = $this->blocks['attributions']->getContent();
     }
-
-    public function __get(string $name)
-    {
-        return $this->data[$name] ?? null;
-    }
 }
 
 /** @internal Represents a Markdown section */
@@ -133,10 +169,10 @@ class MarkdownBlock implements Stringable {
     protected MarkdownHeading $heading;
     protected string $content;
 
-    public function __construct(MarkdownHeading $heading, string $content)
+    public function __construct(MarkdownHeading $heading, string|array $content)
     {
         $this->heading = $heading;
-        $this->content = trim($content);
+        $this->content = trim(is_array($content) ? implode("\n\n", $content) : $content);
     }
 
     public function __toString(): string
@@ -184,6 +220,23 @@ class MarkdownHeading implements Stringable {
     public function getLevel(): int
     {
         return $this->level;
+    }
+}
+
+/** @internal Represents a Markdown code block */
+class MarkdownCodeBlock implements Stringable {
+    protected string $code;
+    protected string $language;
+
+    public function __construct(string $code, string $language = '')
+    {
+        $this->code = $code;
+        $this->language = $language;
+    }
+
+    public function __toString(): string
+    {
+        return '```'.$this->language."\n".$this->code."\n```";
     }
 }
 
