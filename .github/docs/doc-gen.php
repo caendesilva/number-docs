@@ -2,12 +2,16 @@
 
 require __DIR__.'/../../vendor/autoload.php';
 
+/**
+ * @internal This file is used by the Number package to generate documentation for the package, using reflection and source code evaluation.
+ *           It is not intended to be used outside of the package, and it's not designed to be pretty or efficient.
+ */
+
 use FriendsOfPhp\Number\Number;
 use JetBrains\PhpStorm\NoReturn;
 
 $timeStart = microtime(true);
 
-/** @internal This class is used by the Number package to generate documentation for the package, using reflection and source code evaluation. It is not intended to be used outside of the package. */
 class DocumentationGenerator
 {
     protected readonly ReadmeData $readme;
@@ -119,7 +123,8 @@ class DocumentationGenerator
 }
 
 /**
- * @internal Data object for the Readme
+ * Data object for the Readme
+ *
  * @property-read string $title
  * @property-read string $description
  * @property-read string $license
@@ -203,7 +208,7 @@ class ReadmeData
     }
 }
 
-/** @internal Represents a Markdown section */
+/** Represents a Markdown section */
 class MarkdownBlock implements Stringable
 {
     protected MarkdownHeading $heading;
@@ -236,7 +241,7 @@ class MarkdownBlock implements Stringable
     }
 }
 
-/** @internal Represents a Markdown heading */
+/** Represents a Markdown heading */
 class MarkdownHeading implements Stringable
 {
     protected string $text;
@@ -264,7 +269,7 @@ class MarkdownHeading implements Stringable
     }
 }
 
-/** @internal Represents a Markdown code block */
+/** Represents a Markdown code block */
 class MarkdownCodeBlock implements Stringable
 {
     protected string $code;
@@ -282,7 +287,7 @@ class MarkdownCodeBlock implements Stringable
     }
 }
 
-/** @internal Generates method documentation for the Number class */
+/** Generates method documentation for the Number class */
 class MethodDocumentationGenerator
 {
     protected readonly ReflectionClass $reflectionClass;
@@ -478,7 +483,7 @@ class PHPDoc
     }
 }
 
-/** @internal Parses the examples returned by the examples function to a more usable format */
+/** Parses the examples returned by the examples function to a more usable format */
 class ExampleParser
 {
     protected array $examples;
@@ -516,7 +521,7 @@ class ExampleParser
     }
 }
 
-/** @internal Represents an example object */
+/** Represents an example object */
 class ExampleObject implements Stringable
 {
     public readonly string $source;
@@ -556,10 +561,7 @@ $generator->generate();
 
 echo $generator->getMarkdown() . "\n\n";
 
-// Temp for testing
-file_put_contents(__DIR__.'/../../vendor/hyde/_docs/index.md', $generator->getMarkdown());
-
-#[NoReturn] function dd($data): void
+function dd($data): void
 {
     var_dump($data);
     die;
@@ -568,9 +570,9 @@ file_put_contents(__DIR__.'/../../vendor/hyde/_docs/index.md', $generator->getMa
 function checkForIssues(string $document): string|false
 {
     $errors = [];
-//    if (str_contains($document, '// No examples available')) {
-//        $errors[] = 'No examples available for one or more methods';
-//    }
+    //    if (str_contains($document, '// No examples available')) {
+    //        $errors[] = 'No examples available for one or more methods';
+    //    }
 
     if ($errors) {
         return sprintf("\033[31mFound %s %s!\033[0m\n", Number::format(count($errors)), count($errors) === 1 ? 'issue' : 'issues').'- '. implode("\n- ", $errors)."\n\n";
@@ -589,3 +591,6 @@ echo sprintf("\033[32mAll done!\033[0m Generated in: %sms\n", Number::format((mi
 if ($errors) {
     exit(1);
 }
+
+// Temp for testing
+file_put_contents(__DIR__.'/../../vendor/hyde/_docs/index.md', $generator->getMarkdown());
