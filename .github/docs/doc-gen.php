@@ -8,7 +8,6 @@ require __DIR__.'/../../src/Number.php';
  */
 
 use FriendsOfPhp\Number\Number;
-use JetBrains\PhpStorm\NoReturn;
 
 $timeStart = microtime(true);
 
