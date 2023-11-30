@@ -3,6 +3,7 @@
 require __DIR__.'/../../vendor/autoload.php';
 
 use FriendsOfPhp\Number\Number;
+use JetBrains\PhpStorm\NoReturn;
 
 $timeStart = microtime(true);
 
@@ -557,7 +558,7 @@ echo $generator->getMarkdown() . "\n\n";
 // Temp for testing
 file_put_contents(__DIR__.'/../../vendor/hyde/_docs/index.md', $generator->getMarkdown());
 
-function dd($data)
+#[NoReturn] function dd($data): void
 {
     var_dump($data);
     die;
