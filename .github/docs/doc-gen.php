@@ -395,7 +395,7 @@ final class MethodDocumentationGenerator
 }
 
 /**
- * @internal Represents a PHPDoc comment
+ * Represents a PHPDoc comment
  *
  * @property-read string $comment
  * @property-read string $description
