@@ -36,7 +36,8 @@ class DocumentationGenerator
         $this->composerData = json_decode(file_get_contents(__DIR__.'/../../composer.json'), true);
     }
 
-    protected function assembleDocument(): void {
+    protected function assembleDocument(): void
+    {
         $this->addBlock(
             new MarkdownBlock(
                 new MarkdownHeading($this->readme->title, 1),
@@ -62,11 +63,13 @@ class DocumentationGenerator
         );
     }
 
-    protected function compileDocument(): void {
+    protected function compileDocument(): void
+    {
         $this->markdown = implode("\n\n", $this->markdownSections);
     }
 
-    protected function addBlock(MarkdownBlock $block): void {
+    protected function addBlock(MarkdownBlock $block): void
+    {
         $this->markdownSections[] = $block;
     }
 
@@ -165,7 +168,8 @@ class ReadmeData
 }
 
 /** @internal Represents a Markdown section */
-class MarkdownBlock implements Stringable {
+class MarkdownBlock implements Stringable
+{
     protected MarkdownHeading $heading;
     protected string $content;
 
@@ -197,7 +201,8 @@ class MarkdownBlock implements Stringable {
 }
 
 /** @internal Represents a Markdown heading */
-class MarkdownHeading implements Stringable {
+class MarkdownHeading implements Stringable
+{
     protected string $text;
     protected int $level;
 
@@ -224,7 +229,8 @@ class MarkdownHeading implements Stringable {
 }
 
 /** @internal Represents a Markdown code block */
-class MarkdownCodeBlock implements Stringable {
+class MarkdownCodeBlock implements Stringable
+{
     protected string $code;
     protected string $language;
 
