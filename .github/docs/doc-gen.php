@@ -497,11 +497,6 @@ class ExampleParser
 {
     protected array $examples;
 
-    public static function parse(array $examples): static
-    {
-        return new static($examples);
-    }
-
     /** @param array $examples Array of the return values */
     public function __construct(array $examples)
     {
@@ -518,7 +513,7 @@ class ExampleParser
     protected function parseExamples(array $input): array
     {
         $contents = explode("\n", file_get_contents(__FILE__));
-        $functionCallLine = debug_backtrace()[2]['line'] - count($input);
+        $functionCallLine = debug_backtrace()[1]['line'] - count($input);
         $examples = [];
 
         foreach ($input as $index => $result) {
@@ -580,7 +575,7 @@ function finishUp(float $timeStart, DocumentationGenerator $generator): void
 /** Binds examples to be documented */
 function examples(): ExampleParser
 {
-    return ExampleParser::parse([
+    return new ExampleParser([
         Number::format(1234567.89),
         Number::spell(1234),
         Number::ordinal(42),
