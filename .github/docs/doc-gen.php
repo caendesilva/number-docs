@@ -15,14 +15,18 @@ final class DocumentationGenerator
 {
     private readonly ReadmeData $readme;
     private readonly array $composerData;
+    private readonly array $frontMatter;
 
-    private array $frontMatter = [];
     private array $markdownSections = [];
     private string $markdown;
 
+    public function __construct(array $frontMatter = [])
+    {
+        $this->frontMatter = $frontMatter;
+    }
+
     public function generate(): void
     {
-        $this->frontMatter = frontMatter();
         $this->loadAndParseReadmeData();
         $this->loadAndParseComposerData();
         $this->assembleDocument();
@@ -576,16 +580,11 @@ function examples(): ExampleParser
     ]);
 }
 
-function frontMatter(): array
-{
-    return [
-        'title' => 'Documentation',
-        'navigation.title' => 'Documentation',
-    ];
-}
-
 // Run the generator
-$generator = new DocumentationGenerator();
+$generator = new DocumentationGenerator([
+    'title' => 'Documentation',
+    'navigation.title' => 'Documentation',
+]);
 $generator->generate();
 
 
