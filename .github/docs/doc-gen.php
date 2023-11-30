@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__.'/../../vendor/autoload.php';
+require __DIR__.'/../../src/Number.php';
 
 /**
  * @internal This file is used by the Number package to generate documentation for the package, using reflection and source code evaluation.
