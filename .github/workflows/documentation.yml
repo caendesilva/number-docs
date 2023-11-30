@@ -26,7 +26,7 @@ jobs:
             Hyde\Pages\DocumentationPage: ''
           load_app_styles_from_cdn: true
           pretty_urls: true
-          ' > hyde.yml
+          ' > hyde/hyde.yml
           php ./.github/docs/doc-gen.php --output hyde/_docs/index.md
 
       - name: Build and Deploy HydePHP Site
