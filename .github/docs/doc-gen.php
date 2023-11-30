@@ -4,6 +4,8 @@ require __DIR__.'/../../vendor/autoload.php';
 
 use FriendsOfPhp\Number\Number;
 
+$timeStart = microtime(true);
+
 /** @internal This class is used by the Number package to generate documentation for the package, using reflection and source code evaluation. It is not intended to be used outside of the package. */
 class DocumentationGenerator
 {
@@ -550,7 +552,7 @@ function examples(): ExampleParser
 $generator = new DocumentationGenerator();
 $generator->generate();
 
-echo $generator->getMarkdown();
+echo $generator->getMarkdown() . "\n\n";
 
 // Temp for testing
 file_put_contents(__DIR__.'/../../vendor/hyde/_docs/index.md', $generator->getMarkdown());
@@ -559,4 +561,29 @@ function dd($data)
 {
     var_dump($data);
     die;
+}
+
+function checkForIssues(string $document): string|false
+{
+    $errors = [];
+    if (str_contains($document, '// No examples available')) {
+        $errors[] = 'No examples available for one or more methods';
+    }
+
+    if ($errors) {
+        return sprintf("\033[31mFound %s %s!\033[0m\n", Number::format(count($errors)), count($errors) === 1 ? 'issue' : 'issues').'- '. implode("\n- ", $errors)."\n\n";
+    }
+    return false;
+}
+
+$errors = checkForIssues($generator->getMarkdown());
+
+if ($errors) {
+    echo $errors;
+}
+
+echo sprintf("\033[32mAll done!\033[0m Generated in: %sms\n", Number::format((microtime(true) - $timeStart) * 1000));
+
+if ($errors) {
+    exit(1);
 }
