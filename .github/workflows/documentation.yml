@@ -21,6 +21,7 @@ jobs:
       - name: Generate Documentation
         run: |
           mkdir hyde
+          mkdir hyde/_docs
           echo 'output_directories:
             \Hyde\Pages\DocumentationPage::class: ""' > hyde.yml
           php ./.github/docs/doc-gen.php --output hyde/_docs/index.md
