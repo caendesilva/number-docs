@@ -466,6 +466,78 @@ class PHPDoc
     }
 }
 
+/** @internal Parses the examples returned by the examples function to a more usable format */
+class ExampleParser
+{
+    protected array $examples;
+
+    public static function parse(array $examples): static
+    {
+        return new static($examples);
+    }
+
+    /** @param array $examples Array of the return values */
+    public function __construct(array $examples)
+    {
+        $this->examples = $this->parseExamples($examples);
+    }
+
+    public function getExamplesForMethod(string $method): array
+    {
+        return array_filter($this->examples, function (ExampleObject $example) use ($method) {
+            return str_starts_with($example->source, "Number::$method");
+        });
+    }
+
+    protected function parseExamples(array $input): array
+    {
+        $contents = explode("\n", file_get_contents(__FILE__));
+        $functionCallLine = debug_backtrace()[2]['line'] - count($input);
+        $examples = [];
+
+        foreach ($input as $index => $result) {
+            $source = trim($contents[$functionCallLine + $index], "\t\n\r\0\x0B, ");
+            $examples[] = new ExampleObject($source, $result);
+        }
+
+        return $examples;
+    }
+}
+
+/** @internal Represents an example object */
+class ExampleObject implements Stringable
+{
+    public readonly string $source;
+    public readonly string $result;
+
+    public function __construct($source, $result)
+    {
+        $this->source = $source;
+        $this->result = $result;
+    }
+
+    public function __toString(): string
+    {
+        return "echo $this->source; // $this->result";
+    }
+}
+
+// Config functions
+
+/** Binds examples to be documented */
+function examples(): ExampleParser
+{
+    return ExampleParser::parse([
+        Number::format(1234567.89),
+        Number::spell(1234),
+        Number::ordinal(42),
+        Number::percentage(0.75),
+        Number::currency(1234.56, 'EUR'),
+        Number::fileSize(1024),
+        Number::forHumans(1234567.89),
+    ]);
+}
+
 // Run the generator
 $generator = new DocumentationGenerator();
 $generator->generate();
