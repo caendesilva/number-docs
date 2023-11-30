@@ -333,7 +333,7 @@ final class MethodDocumentationGenerator
 
     private function generateMethodDocumentation(ReflectionMethod $method): MarkdownBlock
     {
-        $phpDoc = PHPDoc::parse($method->getDocComment());
+        $phpDoc = new PHPDoc($method->getDocComment());
         $examples = $this->examples->getExamplesForMethod($method->getName());
 
         return new MarkdownBlock(
@@ -410,11 +410,6 @@ final class PHPDoc
     private ?string $returnType = null;
     private array $params = [];
     private array $extraTags = [];
-
-    public static function parse(string $comment): self
-    {
-        return new self($comment);
-    }
 
     public function __construct(string $comment)
     {
