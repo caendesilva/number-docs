@@ -61,6 +61,34 @@ class DocumentationGenerator
                 ]
             )
         );
+
+        $this->addBlock(
+            new MarkdownBlock(
+                new MarkdownHeading('Full Reference', 2),
+                '// TODO',
+            )
+        );
+
+        $this->addBlock(
+            new MarkdownBlock(
+                new MarkdownHeading('License', 2),
+                $this->readme->license,
+            )
+        );
+
+        $this->addBlock(
+            new MarkdownBlock(
+                new MarkdownHeading('Attributions', 2),
+                $this->readme->attributions,
+            )
+        );
+
+        $this->addBlock(
+            new MarkdownBlock(
+                new MarkdownHeading('Contributing', 2),
+                $this->readme->contributing ?? 'Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.',
+            )
+        );
     }
 
     protected function compileDocument(): void
