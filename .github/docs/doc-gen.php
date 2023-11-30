@@ -9,20 +9,22 @@ require __DIR__.'/../../src/Number.php';
 
 use FriendsOfPhp\Number\Number;
 
-$timeStart = microtime(true);
+define('TIME_START', microtime(true));
 
 final class DocumentationGenerator
 {
     private readonly ReadmeData $readme;
+    private readonly MethodExamples $examples;
+    private readonly FrontMatter $matter;
     private readonly array $composerData;
-    private readonly array $frontMatter;
 
     private array $markdownSections = [];
     private string $markdown;
 
-    public function __construct(array $frontMatter = [])
+    public function __construct(FrontMatter $matter, MethodExamples $examples)
     {
-        $this->frontMatter = $frontMatter;
+        $this->examples = $examples;
+        $this->matter = $matter;
     }
 
     public function generate(): void
@@ -35,14 +37,7 @@ final class DocumentationGenerator
 
     public function getMarkdown(): string
     {
-        $frontMatter = empty($this->frontMatter) ? '' : sprintf(
-            "---\n%s\n---\n\n",
-            implode("\n", array_map(function (string $key, string $value): string {
-                return "$key: $value";
-            }, array_keys($this->frontMatter), $this->frontMatter))
-        );
-
-        return $frontMatter . $this->markdown;
+        return "$this->matter\n$this->markdown";
     }
 
     private function loadAndParseReadmeData(): void
@@ -130,7 +125,7 @@ final class DocumentationGenerator
 
     private function generateMethodDocumentation(): string
     {
-        return (new MethodDocumentationGenerator())->generate();
+        return (new MethodDocumentationGenerator($this->examples))->generate();
     }
 }
 
@@ -298,29 +293,24 @@ final class MarkdownCodeBlock implements Stringable
 final class MethodDocumentationGenerator
 {
     private readonly ReflectionClass $reflectionClass;
-    private readonly ExampleParser $examples;
+    private readonly MethodExamples $examples;
     /** @var array<string, ReflectionMethod> */
     private array $methodsToDocument;
     /** @var array<string, MarkdownBlock> */
     private array $methodDocumentation;
 
-    public function __construct()
+    public function __construct(MethodExamples $examples)
     {
         $this->reflectionClass = new ReflectionClass(Number::class);
+        $this->examples = $examples;
     }
 
     public function generate(): string
     {
-        $this->parseExamples();
         $this->discoverMethodsToDocument();
         $this->generateMethodsDocumentation();
 
         return $this->compile();
-    }
-
-    private function parseExamples(): void
-    {
-        $this->examples = examples();
     }
 
     private function discoverMethodsToDocument(): void
@@ -421,14 +411,14 @@ final class PHPDoc
     private array $params = [];
     private array $extraTags = [];
 
-    public static function parse(string $comment): static
+    public static function parse(string $comment): self
     {
-        return new static($comment);
+        return new self($comment);
     }
 
     public function __construct(string $comment)
     {
-        $this->comment = static::stripCommentDirectives($comment);
+        $this->comment = self::stripCommentDirectives($comment);
         $this->parseTags();
     }
 
@@ -486,8 +476,28 @@ final class PHPDoc
     }
 }
 
+/** Front matter container */
+class FrontMatter implements Stringable
+{
+    private array $data;
+
+    public function __construct(array $data)
+    {
+        $this->data = $data;
+    }
+
+    public function __toString(): string
+    {
+        $yaml = [];
+        foreach ($this->data as $key => $value) {
+            $yaml[] = "$key: $value";
+        }
+        return "---\n".implode("\n", $yaml)."\n---\n";
+    }
+}
+
 /** Parses the examples returned by the examples function to a more usable format */
-final class ExampleParser
+final class MethodExamples
 {
     private array $examples;
 
@@ -559,37 +569,30 @@ function handleOutput(DocumentationGenerator $generator): void
     }
 }
 
-function finishUp(float $timeStart, DocumentationGenerator $generator): void
+function finishUp(DocumentationGenerator $generator): void
 {
-    echo sprintf("\033[32mAll done!\033[0m Generated in: %sms (SHA1: %s)\n", Number::format((microtime(true) - $timeStart) * 1000), sha1($generator->getMarkdown()));
-}
-
-// Config functions
-
-/** Binds examples to be documented */
-function examples(): ExampleParser
-{
-    return new ExampleParser([
-        Number::format(1234567.89),
-        Number::spell(1234),
-        Number::ordinal(42),
-        Number::percentage(0.75),
-        Number::currency(1234.56, 'EUR'),
-        Number::fileSize(1024),
-        Number::forHumans(1234567.89),
-    ]);
+    echo sprintf("\033[32mAll done!\033[0m Generated in: %sms (SHA1: %s)\n", Number::format((microtime(true) - TIME_START) * 1000), sha1($generator->getMarkdown()));
 }
 
 // Run the generator
-$generator = new DocumentationGenerator([
+
+$generator = new DocumentationGenerator(new FrontMatter([
     'title' => 'Documentation',
     'navigation.title' => 'Documentation',
-]);
-$generator->generate();
+]), new MethodExamples([
+    Number::format(1234567.89),
+    Number::spell(1234),
+    Number::ordinal(42),
+    Number::percentage(0.75),
+    Number::currency(1234.56, 'EUR'),
+    Number::fileSize(1024),
+    Number::forHumans(1234567.89),
+]));
 
+$generator->generate();
 
 // Temp to ensure integrity of refactor
 assert(sha1($generator->getMarkdown()) === '4bedaec674484df2e917b476ecd11f25bc43f6aa');
 
 handleOutput($generator);
-finishUp($timeStart, $generator);
+finishUp($generator);
