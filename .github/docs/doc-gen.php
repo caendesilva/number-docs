@@ -61,6 +61,7 @@ class ReadmeData
         $this->contents = file_get_contents(__DIR__.'/../../README.md');
         $this->lines = explode("\n", $this->contents);
         $this->parseReadme();
+        $this->parseData();
     }
 
     protected function parseReadme(): void
@@ -107,6 +108,14 @@ class ReadmeData
         $this->blocks = $parsedBlocks;
     }
 
+    protected function parseData(): void
+    {
+        $this->data['title'] = $this->blocks[array_key_first($this->blocks)]->getHeading()->getText();
+        $this->data['description'] = $this->blocks[array_key_first($this->blocks)]->getContent();
+        $this->data['license'] = $this->blocks['license']->getContent();
+        $this->data['attributions'] = $this->blocks['attributions']->getContent();
+    }
+
     public function __get(string $name)
     {
         return $this->data[$name] ?? null;
@@ -121,12 +130,12 @@ class MarkdownBlock implements Stringable {
     public function __construct(MarkdownHeading $heading, string $content)
     {
         $this->heading = $heading;
-        $this->content = $content;
+        $this->content = trim($content);
     }
 
     public function __toString(): string
     {
-        return $this->heading."\n\n".$this->content;
+        return $this->heading."\n\n".$this->getContent();
     }
 
     public function addLine(string $line): void
@@ -137,6 +146,11 @@ class MarkdownBlock implements Stringable {
     public function getHeading(): MarkdownHeading
     {
         return $this->heading;
+    }
+
+    public function getContent(): string
+    {
+        return trim($this->content);
     }
 }
 
