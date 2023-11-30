@@ -164,7 +164,7 @@ final class ReadmeData
 
     private function parseReadme(): void
     {
-        // Start by generating blocks. Each block starts with a heading, and ends with the next heading or the end of the file.
+        // Each block starts with a heading, and ends with the next heading or the end of the file.
         $blocks = [];
         $currentBlock = null;
         foreach ($this->lines as $line) {
@@ -338,50 +338,27 @@ final class MethodDocumentationGenerator
 
         return new MarkdownBlock(
             new MarkdownHeading("`Number::{$method->getName()}()`", 3),
-            array_filter([
+            [
                 $phpDoc->description,
-                new MarkdownCodeBlock(
-                    $this->generateMethodSignature($method, $phpDoc),
-                    'php'
-                ),
+                new MarkdownCodeBlock($this->generateMethodSignature($method, $phpDoc), 'php'),
                 $examples ? new MarkdownBlock(
                     new MarkdownHeading('Usage', 4),
-                    new MarkdownCodeBlock(
-                        $examples,
-                        'php'
-                    )
+                    new MarkdownCodeBlock($examples, 'php')
                 ) : null,
-            ])
+            ]
         );
     }
 
     private function generateMethodSignature(ReflectionMethod $method, PHPDoc $phpDoc): string
     {
-        $signature = "Number::{$method->getName()}(";
-        $parameters = [];
-        foreach ($method->getParameters() as $parameter) {
-            $type = $parameter->getType();
-            if ($type) {
-                if (method_exists($type, 'getTypes')) {
-                    $type = implode('|', $type->getTypes());
-                } else {
-                    $type = $type->getName();
-                }
-            }
-            $docParam = $phpDoc->params[$parameter->getName()] ?? null;
-            if ($docParam) {
-                $type = $docParam;
-            }
-
-            $addNullShorthand = ($parameter->isOptional() && $parameter->allowsNull()) && !str_contains($type, 'null');
-            $typeString = ($addNullShorthand ? '?' : '').$type.' ';
-
-            $parameters[] = $typeString. '$'.$parameter->getName();
-        }
-        $signature .= implode(', ', $parameters);
-        $signature .= ')';
-        $returnType = $phpDoc->returnType ?? $method->getReturnType() ?? 'mixed';
-        return $signature.': '.$returnType;
+        return sprintf(
+            "Number::%s(%s): %s",
+            $method->getName(),
+            implode(', ', array_map(function (ReflectionParameter $parameter) use ($phpDoc): string {
+                return $this->generateParameterList($parameter, $phpDoc);
+            }, $method->getParameters())),
+            $phpDoc->returnType ?? $method->getReturnType() ?? 'mixed'
+        );
     }
 
     private function compile(): string
@@ -391,6 +368,23 @@ final class MethodDocumentationGenerator
             $markdown[] = $method;
         }
         return implode("\n\n", $markdown);
+    }
+
+    private function generateParameterList(ReflectionParameter $parameter, PHPDoc $phpDoc): string
+    {
+        $type = $parameter->getType();
+        if ($type) {
+            $type = method_exists($type, 'getTypes') ? implode('|', $type->getTypes()) : $type->getName();
+        }
+        $docParam = $phpDoc->params[$parameter->getName()] ?? null;
+        if ($docParam) {
+            $type = $docParam;
+        }
+
+        $addNullShorthand = ($parameter->isOptional() && $parameter->allowsNull()) && !str_contains($type, 'null');
+        $typeString = ($addNullShorthand ? '?' : '') . $type . ' ';
+
+        return $typeString . '$' . $parameter->getName();
     }
 }
 
