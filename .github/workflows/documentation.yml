@@ -33,3 +33,4 @@ jobs:
           env-torchlight-token: ${{ secrets.TORCHLIGHT_TOKEN }}
           env-site-name: "'Friends of PHP'"
           directory: hyde
+          framework-version: dev-develop
