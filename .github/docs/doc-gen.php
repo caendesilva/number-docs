@@ -65,7 +65,7 @@ class DocumentationGenerator
         $this->addBlock(
             new MarkdownBlock(
                 new MarkdownHeading('Full Reference', 2),
-                '// TODO',
+                $this->generateMethodDocumentation(),
             )
         );
 
@@ -107,6 +107,11 @@ class DocumentationGenerator
             'Install the package using Composer:',
             new MarkdownCodeBlock("composer require {$this->composerData['name']}", 'bash'),
         ];
+    }
+
+    protected function generateMethodDocumentation(): string
+    {
+        return (new MethodDocumentationGenerator())->generate();
     }
 }
 
@@ -274,6 +279,192 @@ class MarkdownCodeBlock implements Stringable
     }
 }
 
+/** @internal Generates method documentation for the Number class */
+class MethodDocumentationGenerator
+{
+    protected readonly ReflectionClass $reflectionClass;
+    /** @var array<string, ReflectionMethod> */
+    protected array $methodsToDocument;
+    /** @var array<string, MarkdownBlock> */
+    protected array $methodDocumentation;
+
+    public function __construct()
+    {
+        $this->reflectionClass = new ReflectionClass(Number::class);
+    }
+
+    public function generate(): string
+    {
+        $this->discoverMethodsToDocument();
+        $this->generateMethodsDocumentation();
+
+        return $this->compile();
+    }
+
+    protected function discoverMethodsToDocument(): void
+    {
+        $this->methodsToDocument = [];
+        foreach ($this->reflectionClass->getMethods() as $method) {
+            if ($method->isPublic() && !$method->isConstructor() && !$method->isDestructor()) {
+                $this->methodsToDocument[$method->getName()] = $method;
+            }
+        }
+    }
+
+    protected function generateMethodsDocumentation(): void
+    {
+        $this->methodDocumentation = [];
+        foreach ($this->methodsToDocument as $methodName => $method) {
+            $this->methodDocumentation[$methodName] = $this->generateMethodDocumentation($method);
+        }
+    }
+
+    protected function generateMethodDocumentation(ReflectionMethod $method): MarkdownBlock
+    {
+        $phpDoc = PHPDoc::parse($method->getDocComment());
+        return new MarkdownBlock(
+            new MarkdownHeading("`Number::{$method->getName()}()`", 3),
+            [
+                $phpDoc->description,
+                new MarkdownCodeBlock(
+                    $this->generateMethodSignature($method, $phpDoc),
+                    'php'
+                ),
+                new MarkdownBlock(
+                    new MarkdownHeading('Usage', 4),
+                    new MarkdownCodeBlock(
+                        'TODO',
+                        'php'
+                    )
+                ),
+            ]
+        );
+    }
+
+    protected function generateMethodSignature(ReflectionMethod $method, PHPDoc $phpDoc): string
+    {
+        $signature = "Number::{$method->getName()}(";
+        $parameters = [];
+        foreach ($method->getParameters() as $parameter) {
+            $type = $parameter->getType();
+            if ($type) {
+                if (method_exists($type, 'getTypes')) {
+                    $type = implode('|', $type->getTypes());
+                } else {
+                    $type = $type->getName();
+                }
+            }
+            $docParam = $phpDoc->params[$parameter->getName()] ?? null;
+            if ($docParam) {
+                $type = $docParam;
+            }
+
+            $typeString = ($parameter->isOptional() ? '?' : '').$type.' ';
+
+            $parameters[] = $typeString. '$'.$parameter->getName();
+        }
+        $signature .= implode(', ', $parameters);
+        $signature .= ')';
+        $returnType = $phpDoc->returnType ?? $method->getReturnType() ?? 'mixed';
+        return $signature.': '.$returnType;
+    }
+
+    protected function compile(): string
+    {
+        $markdown = [];
+        foreach ($this->methodDocumentation as $method) {
+            $markdown[] = $method;
+        }
+        return implode("\n\n", $markdown);
+    }
+}
+
+/**
+ * @internal Represents a PHPDoc comment
+ *
+ * @property-read string $comment
+ * @property-read string $description
+ * @property-read string|null $returnType
+ * @property-read array<string, string> $params
+ * @property-read array<string, string> $extraTags
+ */
+class PHPDoc
+{
+    protected string $comment;
+    protected string $description;
+    protected ?string $returnType = null;
+    protected array $params = [];
+    protected array $extraTags = [];
+    
+    public static function parse(string $comment): static
+    {
+        return new static($comment);
+    }
+
+    public function __construct(string $comment)
+    {
+        $this->comment = static::stripCommentDirectives($comment);
+        $this->parseTags();
+    }
+
+    protected function parseTags(): void
+    {
+        $lines = explode("\n", $this->comment);
+        $description = '';
+        foreach ($lines as $line) {
+            if (str_starts_with($line, '@')) {
+                $parts = explode(' ', $line);
+                $tag = substr(array_shift($parts), 1);
+
+                if ($tag === 'return') {
+                    $this->returnType = array_shift($parts);
+                    continue;
+                }
+
+                if ($tag === 'param') {
+                    $paramName = trim($parts[1], '$');
+                    $paramType = $parts[0];
+
+                    $this->params[$paramName] = $paramType;
+
+                    continue;
+                }
+
+                $tagId = $tag;
+                if (isset($this->extraTags[$tagId])) {
+                    $count = 1;
+                    while (isset($this->extraTags[$tagId.'-'.$count])) {
+                        $count++;
+                    }
+                    $tagId .= '-'.$count;
+                }
+                $this->extraTags[$tagId] = implode(' ', $parts);
+            } else {
+                $description .= $line."\n";
+            }
+        }
+        if ($description) {
+            $this->description = trim($description);
+        }
+    }
+
+    public function getTags(): array
+    {
+        return $this->extraTags;
+    }
+
+    public function __get(string $name): null|string|array
+    {
+        return $this->{$name} ?? $this->extraTags[$name] ?? null;
+    }
+
+    protected static function stripCommentDirectives(string $comment): string
+    {
+        return trim(implode("\n", array_map(function (string $line): string {
+            return trim(str_replace(['*', '/'], '', $line));
+        }, explode("\n", $comment))));
+    }
+}
 
 // Run the generator
 $generator = new DocumentationGenerator();
