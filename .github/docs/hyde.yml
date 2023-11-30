@@ -1,0 +1,10 @@
+hyde:
+    output_directories:
+        documentation-page: ''
+    load_app_styles_from_cdn: true
+    pretty_urls: true
+
+docs:
+    sidebar:
+        header: 'Number Documentation'
+        footer: '[https://github.com/FriendsOfPHP/number](GitHub Source Code)'
