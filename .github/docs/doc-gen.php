@@ -7,8 +7,8 @@ use FriendsOfPhp\Number\Number;
 /** @internal This class is used by the Number package to generate documentation for the package, using reflection and source code evaluation. It is not intended to be used outside of the package. */
 class DocumentationGenerator
 {
-    protected readonly ReadmeData $readmeContents;
-    protected readonly array $readmeData;
+    protected readonly ReadmeData $readme;
+    protected readonly array $composerData;
 
     protected array $markdownSections = [];
     protected string $markdown;
@@ -28,12 +28,12 @@ class DocumentationGenerator
 
     protected function loadAndParseReadmeData(): void
     {
-        $this->readmeContents = new ReadmeData();
+        $this->readme = new ReadmeData();
     }
 
     protected function loadAndParseComposerData(): void
     {
-        $this->readmeData = json_decode(file_get_contents(__DIR__.'/../../composer.json'), true);
+        $this->composerData = json_decode(file_get_contents(__DIR__.'/../../composer.json'), true);
     }
 
     protected function assembleDocument(): void {
