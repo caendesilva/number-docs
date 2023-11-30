@@ -552,6 +552,8 @@ $generator->generate();
 
 echo $generator->getMarkdown();
 
+// Temp for testing
+file_put_contents(__DIR__.'/../../vendor/hyde/_docs/index.md', $generator->getMarkdown());
 
 function dd($data)
 {
