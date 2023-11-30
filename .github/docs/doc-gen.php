@@ -406,7 +406,7 @@ class PHPDoc
     protected ?string $returnType = null;
     protected array $params = [];
     protected array $extraTags = [];
-    
+
     public static function parse(string $comment): static
     {
         return new static($comment);
