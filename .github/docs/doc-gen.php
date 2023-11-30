@@ -16,6 +16,7 @@ class DocumentationGenerator
     public function generate(): void
     {
         $this->loadAndParseReadmeData();
+        $this->loadAndParseComposerData();
         $this->assembleDocument();
         $this->compileDocument();
     }
@@ -28,6 +29,11 @@ class DocumentationGenerator
     protected function loadAndParseReadmeData(): void
     {
         $this->readmeContents = new ReadmeData();
+    }
+
+    protected function loadAndParseComposerData(): void
+    {
+        $this->readmeData = json_decode(file_get_contents(__DIR__.'/../../composer.json'), true);
     }
 
     protected function assembleDocument(): void {
