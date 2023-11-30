@@ -267,9 +267,9 @@ class MarkdownCodeBlock implements Stringable
     protected string $code;
     protected string $language;
 
-    public function __construct(string $code, string $language = '')
+    public function __construct(string|array $code, string $language = '')
     {
-        $this->code = $code;
+        $this->code = trim(is_array($code) ? implode("\n", $code) : $code);
         $this->language = $language;
     }
 
@@ -283,6 +283,7 @@ class MarkdownCodeBlock implements Stringable
 class MethodDocumentationGenerator
 {
     protected readonly ReflectionClass $reflectionClass;
+    protected readonly ExampleParser $examples;
     /** @var array<string, ReflectionMethod> */
     protected array $methodsToDocument;
     /** @var array<string, MarkdownBlock> */
@@ -295,10 +296,16 @@ class MethodDocumentationGenerator
 
     public function generate(): string
     {
+        $this->parseExamples();
         $this->discoverMethodsToDocument();
         $this->generateMethodsDocumentation();
 
         return $this->compile();
+    }
+
+    protected function parseExamples(): void
+    {
+        $this->examples = examples();
     }
 
     protected function discoverMethodsToDocument(): void
@@ -322,6 +329,7 @@ class MethodDocumentationGenerator
     protected function generateMethodDocumentation(ReflectionMethod $method): MarkdownBlock
     {
         $phpDoc = PHPDoc::parse($method->getDocComment());
+
         return new MarkdownBlock(
             new MarkdownHeading("`Number::{$method->getName()}()`", 3),
             [
@@ -333,7 +341,7 @@ class MethodDocumentationGenerator
                 new MarkdownBlock(
                     new MarkdownHeading('Usage', 4),
                     new MarkdownCodeBlock(
-                        'TODO',
+                        $this->examples->getExamplesForMethod($method->getName()) ?: '// No examples available',
                         'php'
                     )
                 ),
