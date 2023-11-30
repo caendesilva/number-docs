@@ -270,11 +270,6 @@ final class MarkdownHeading implements Stringable
     {
         return $this->text;
     }
-
-    public function getLevel(): int
-    {
-        return $this->level;
-    }
 }
 
 /** Represents a Markdown code block */
