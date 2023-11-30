@@ -580,8 +580,5 @@ $generator = new DocumentationGenerator(new FrontMatter([
 
 $generator->generate();
 
-// Temp to ensure integrity of refactor
-assert(sha1($generator->getMarkdown()) === '4bedaec674484df2e917b476ecd11f25bc43f6aa');
-
 handleOutput($generator);
 finishUp($generator);
