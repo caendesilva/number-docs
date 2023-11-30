@@ -384,7 +384,8 @@ class MethodDocumentationGenerator
                 $type = $docParam;
             }
 
-            $typeString = ($parameter->isOptional() ? '?' : '').$type.' ';
+            $addNullShorthand = $parameter->isOptional() && ! str_contains($type, 'null');
+            $typeString = ($addNullShorthand ? '?' : '').$type.' ';
 
             $parameters[] = $typeString. '$'.$parameter->getName();
         }
