@@ -373,7 +373,7 @@ final class MethodDocumentationGenerator
                 $type = $docParam;
             }
 
-            $addNullShorthand = ($parameter->isOptional() && $parameter->allowsNull()) && ! str_contains($type, 'null');
+            $addNullShorthand = ($parameter->isOptional() && $parameter->allowsNull()) && !str_contains($type, 'null');
             $typeString = ($addNullShorthand ? '?' : '').$type.' ';
 
             $parameters[] = $typeString. '$'.$parameter->getName();
@@ -488,11 +488,11 @@ class FrontMatter implements Stringable
 
     public function __toString(): string
     {
-        $yaml = [];
-        foreach ($this->data as $key => $value) {
-            $yaml[] = "$key: $value";
-        }
-        return "---\n".implode("\n", $yaml)."\n---\n";
+        return sprintf("---\n%s\n---\n", implode("\n", array_map(
+            fn (string $key, string $value): string => "$key: $value",
+            array_keys($this->data),
+            $this->data
+        )));
     }
 }
 
