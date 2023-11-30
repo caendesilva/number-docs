@@ -31,6 +31,6 @@ jobs:
           #deploy-to: pages
           deploy-to: artifact
           env-torchlight-token: ${{ secrets.TORCHLIGHT_TOKEN }}
-          env-site-name: "'Friends of PHP'"
+          env-site-name: "'PHP Number Utility - by Friends of PHP'"
           directory: hyde
           framework-version: dev-develop
