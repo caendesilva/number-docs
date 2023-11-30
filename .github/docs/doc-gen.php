@@ -510,7 +510,7 @@ class ExampleParser
 
     public function getExamplesForMethod(string $method): array
     {
-        return array_filter($this->examples, function (ExampleObject $example) use ($method) {
+        return array_filter($this->examples, function (Example $example) use ($method) {
             return str_starts_with($example->source, "Number::$method");
         });
     }
@@ -523,15 +523,15 @@ class ExampleParser
 
         foreach ($input as $index => $result) {
             $source = trim($contents[$functionCallLine + $index], "\t\n\r\0\x0B, ");
-            $examples[] = new ExampleObject($source, $result);
+            $examples[] = new Example($source, $result);
         }
 
         return $examples;
     }
 }
 
-/** Represents an example object */
-class ExampleObject implements Stringable
+/** Represents a method example */
+class Example implements Stringable
 {
     public readonly string $source;
     public readonly string $result;
@@ -546,6 +546,33 @@ class ExampleObject implements Stringable
     {
         return "echo $this->source; // $this->result";
     }
+}
+
+// Helper functions
+
+function dd(...$data): void
+{
+    var_dump(...$data) && die;
+}
+
+function handleOutput(DocumentationGenerator $generator): void
+{
+    global $argv;
+    if (in_array('--output', $argv)) {
+        $outputIndex = array_search('--output', $argv);
+        $outputPath = $argv[$outputIndex + 1] ?? null;
+
+        file_put_contents($outputPath, $generator->getMarkdown());
+        echo "Wrote documentation to $outputPath\n";
+    } else {
+        echo "No output path specified, displaying raw contents\n\n---\n\n";
+        echo $generator->getMarkdown() . "\n\n";
+    }
+}
+
+function finishUp(float $timeStart, DocumentationGenerator $generator): void
+{
+    echo sprintf("\033[32mAll done!\033[0m Generated in: %sms (SHA1: %s)\n", Number::format((microtime(true) - $timeStart) * 1000), sha1($generator->getMarkdown()));
 }
 
 // Config functions
@@ -576,44 +603,9 @@ function frontMatter(): array
 $generator = new DocumentationGenerator();
 $generator->generate();
 
-function dd($data): void
-{
-    var_dump($data);
-    die;
-}
 
-function checkForIssues(string $document): string|false
-{
-    $errors = [];
-    //    if (str_contains($document, '// No examples available')) {
-    //        $errors[] = 'No examples available for one or more methods';
-    //    }
+// Temp to ensure integrity of refactor
+assert(sha1($generator->getMarkdown()) === '4bedaec674484df2e917b476ecd11f25bc43f6aa');
 
-    if ($errors) {
-        return sprintf("\033[31mFound %s %s!\033[0m\n", Number::format(count($errors)), count($errors) === 1 ? 'issue' : 'issues').'- '. implode("\n- ", $errors)."\n\n";
-    }
-    return false;
-}
-
-$errors = checkForIssues($generator->getMarkdown());
-
-if ($errors) {
-    echo $errors;
-}
-
-if (in_array('--output', $argv)) {
-    $outputIndex = array_search('--output', $argv);
-    $outputPath = $argv[$outputIndex + 1] ?? null;
-
-    file_put_contents($outputPath, $generator->getMarkdown());
-    echo "Wrote documentation to $outputPath\n";
-} else {
-    echo "No output path specified, displaying raw contents\n\n---\n\n";
-    echo $generator->getMarkdown() . "\n\n";
-}
-
-echo sprintf("\033[32mAll done!\033[0m Generated in: %sms (SHA1: %s)\n", Number::format((microtime(true) - $timeStart) * 1000), sha1($generator->getMarkdown()));
-
-if ($errors) {
-    exit(1);
-}
+handleOutput($generator);
+finishUp($timeStart, $generator);
