@@ -559,8 +559,6 @@ function examples(): ExampleParser
 $generator = new DocumentationGenerator();
 $generator->generate();
 
-echo $generator->getMarkdown() . "\n\n";
-
 function dd($data): void
 {
     var_dump($data);
@@ -586,11 +584,19 @@ if ($errors) {
     echo $errors;
 }
 
+if (in_array('--output', $argv)) {
+    $outputIndex = array_search('--output', $argv);
+    $outputPath = $argv[$outputIndex + 1] ?? null;
+
+    file_put_contents($outputPath, $generator->getMarkdown());
+    echo "Wrote documentation to $outputPath\n";
+} else {
+    echo "No output path specified, displaying raw contents\n\n---\n\n";
+    echo $generator->getMarkdown() . "\n\n";
+}
+
 echo sprintf("\033[32mAll done!\033[0m Generated in: %sms\n", Number::format((microtime(true) - $timeStart) * 1000));
 
 if ($errors) {
     exit(1);
 }
-
-// Temp for testing
-file_put_contents(__DIR__.'/../../vendor/hyde/_docs/index.md', $generator->getMarkdown());
