@@ -1,15 +1,15 @@
 <?php
 
+define('TIME_START', microtime(true));
+
 require __DIR__.'/../../src/Number.php';
 
 /**
  * @internal This file is used by the Number package to generate documentation for the package, using reflection and source code evaluation.
- *           It is not intended to be used outside of the package, and it's not designed to be pretty or efficient.
+ *           It is not intended to be used outside the package, and it's not designed to be pretty or efficient.
  */
 
 use FriendsOfPhp\Number\Number;
-
-define('TIME_START', microtime(true));
 
 final class DocumentationGenerator
 {

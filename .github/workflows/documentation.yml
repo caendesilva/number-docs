@@ -23,7 +23,7 @@ jobs:
           mkdir hyde
           mkdir hyde/_docs
           cp ./.github/docs/hyde.yml hyde/hyde.yml
-          php ./.github/docs/doc-gen.php --output hyde/_docs/index.md
+          php ./.github/docs/DocumentationGenerator.php --output hyde/_docs/index.md
 
       - name: Build and Deploy HydePHP Site
         uses: hydephp/action@master
