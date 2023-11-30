@@ -73,12 +73,12 @@ class DocumentationGenerator
         $this->markdownSections[] = $block;
     }
 
-    protected function generateInstallationMarkdown(): string
+    protected function generateInstallationMarkdown(): array
     {
-        return implode("\n\n", [
+        return [
             'Install the package using Composer:',
             new MarkdownCodeBlock("composer require {$this->composerData['name']}", 'bash'),
-        ]);
+        ];
     }
 }
 
