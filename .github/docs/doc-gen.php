@@ -55,7 +55,7 @@ class DocumentationGenerator
     {
         $this->addBlock(
             new MarkdownBlock(
-                new MarkdownHeading($this->readme->title, 1),
+                new MarkdownHeading($this->readme->title . ' - by Friends of PHP', 1),
                 $this->readme->description
             )
         );
