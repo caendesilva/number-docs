@@ -332,23 +332,24 @@ class MethodDocumentationGenerator
     protected function generateMethodDocumentation(ReflectionMethod $method): MarkdownBlock
     {
         $phpDoc = PHPDoc::parse($method->getDocComment());
+        $examples = $this->examples->getExamplesForMethod($method->getName());
 
         return new MarkdownBlock(
             new MarkdownHeading("`Number::{$method->getName()}()`", 3),
-            [
+            array_filter([
                 $phpDoc->description,
                 new MarkdownCodeBlock(
                     $this->generateMethodSignature($method, $phpDoc),
                     'php'
                 ),
-                new MarkdownBlock(
+                $examples ? new MarkdownBlock(
                     new MarkdownHeading('Usage', 4),
                     new MarkdownCodeBlock(
-                        $this->examples->getExamplesForMethod($method->getName()) ?: '// No examples available',
+                        $examples,
                         'php'
                     )
-                ),
-            ]
+                ) : null,
+            ])
         );
     }
 
@@ -567,9 +568,9 @@ file_put_contents(__DIR__.'/../../vendor/hyde/_docs/index.md', $generator->getMa
 function checkForIssues(string $document): string|false
 {
     $errors = [];
-    if (str_contains($document, '// No examples available')) {
-        $errors[] = 'No examples available for one or more methods';
-    }
+//    if (str_contains($document, '// No examples available')) {
+//        $errors[] = 'No examples available for one or more methods';
+//    }
 
     if ($errors) {
         return sprintf("\033[31mFound %s %s!\033[0m\n", Number::format(count($errors)), count($errors) === 1 ? 'issue' : 'issues').'- '. implode("\n- ", $errors)."\n\n";
