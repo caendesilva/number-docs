@@ -11,14 +11,14 @@ use FriendsOfPhp\Number\Number;
 
 $timeStart = microtime(true);
 
-class DocumentationGenerator
+final class DocumentationGenerator
 {
-    protected readonly ReadmeData $readme;
-    protected readonly array $composerData;
+    private readonly ReadmeData $readme;
+    private readonly array $composerData;
 
-    protected array $frontMatter = [];
-    protected array $markdownSections = [];
-    protected string $markdown;
+    private array $frontMatter = [];
+    private array $markdownSections = [];
+    private string $markdown;
 
     public function generate(): void
     {
@@ -41,17 +41,17 @@ class DocumentationGenerator
         return $frontMatter . $this->markdown;
     }
 
-    protected function loadAndParseReadmeData(): void
+    private function loadAndParseReadmeData(): void
     {
         $this->readme = new ReadmeData();
     }
 
-    protected function loadAndParseComposerData(): void
+    private function loadAndParseComposerData(): void
     {
         $this->composerData = json_decode(file_get_contents(__DIR__.'/../../composer.json'), true);
     }
 
-    protected function assembleDocument(): void
+    private function assembleDocument(): void
     {
         $this->addBlock(
             new MarkdownBlock(
@@ -106,17 +106,17 @@ class DocumentationGenerator
         );
     }
 
-    protected function compileDocument(): void
+    private function compileDocument(): void
     {
         $this->markdown = implode("\n\n", $this->markdownSections);
     }
 
-    protected function addBlock(MarkdownBlock $block): void
+    private function addBlock(MarkdownBlock $block): void
     {
         $this->markdownSections[] = $block;
     }
 
-    protected function generateInstallationMarkdown(): array
+    private function generateInstallationMarkdown(): array
     {
         return [
             'Install the package using Composer:',
@@ -124,7 +124,7 @@ class DocumentationGenerator
         ];
     }
 
-    protected function generateMethodDocumentation(): string
+    private function generateMethodDocumentation(): string
     {
         return (new MethodDocumentationGenerator())->generate();
     }
@@ -138,12 +138,12 @@ class DocumentationGenerator
  * @property-read string $license
  * @property-read string $attributions
  */
-class ReadmeData
+final class ReadmeData
 {
-    protected readonly string $contents;
-    protected readonly array $lines;
-    protected readonly array $blocks;
-    protected array $data = [];
+    private readonly string $contents;
+    private readonly array $lines;
+    private readonly array $blocks;
+    private array $data = [];
 
     public function __construct()
     {
@@ -163,7 +163,7 @@ class ReadmeData
         return $this->blocks[$id];
     }
 
-    protected function parseReadme(): void
+    private function parseReadme(): void
     {
         // Start by generating blocks. Each block starts with a heading, and ends with the next heading or the end of the file.
         $blocks = [];
@@ -207,7 +207,7 @@ class ReadmeData
         $this->blocks = $parsedBlocks;
     }
 
-    protected function parseData(): void
+    private function parseData(): void
     {
         $this->data['title'] = $this->blocks[array_key_first($this->blocks)]->getHeading()->getText();
         $this->data['description'] = $this->blocks[array_key_first($this->blocks)]->getContent();
@@ -217,10 +217,10 @@ class ReadmeData
 }
 
 /** Represents a Markdown section */
-class MarkdownBlock implements Stringable
+final class MarkdownBlock implements Stringable
 {
-    protected MarkdownHeading $heading;
-    protected string $content;
+    private MarkdownHeading $heading;
+    private string $content;
 
     public function __construct(MarkdownHeading $heading, string|array $content)
     {
@@ -250,10 +250,10 @@ class MarkdownBlock implements Stringable
 }
 
 /** Represents a Markdown heading */
-class MarkdownHeading implements Stringable
+final class MarkdownHeading implements Stringable
 {
-    protected string $text;
-    protected int $level;
+    private string $text;
+    private int $level;
 
     public function __construct(string $text, int $level)
     {
@@ -278,10 +278,10 @@ class MarkdownHeading implements Stringable
 }
 
 /** Represents a Markdown code block */
-class MarkdownCodeBlock implements Stringable
+final class MarkdownCodeBlock implements Stringable
 {
-    protected string $code;
-    protected string $language;
+    private string $code;
+    private string $language;
 
     public function __construct(string|array $code, string $language = '')
     {
@@ -296,14 +296,14 @@ class MarkdownCodeBlock implements Stringable
 }
 
 /** Generates method documentation for the Number class */
-class MethodDocumentationGenerator
+final class MethodDocumentationGenerator
 {
-    protected readonly ReflectionClass $reflectionClass;
-    protected readonly ExampleParser $examples;
+    private readonly ReflectionClass $reflectionClass;
+    private readonly ExampleParser $examples;
     /** @var array<string, ReflectionMethod> */
-    protected array $methodsToDocument;
+    private array $methodsToDocument;
     /** @var array<string, MarkdownBlock> */
-    protected array $methodDocumentation;
+    private array $methodDocumentation;
 
     public function __construct()
     {
@@ -319,12 +319,12 @@ class MethodDocumentationGenerator
         return $this->compile();
     }
 
-    protected function parseExamples(): void
+    private function parseExamples(): void
     {
         $this->examples = examples();
     }
 
-    protected function discoverMethodsToDocument(): void
+    private function discoverMethodsToDocument(): void
     {
         $this->methodsToDocument = [];
         foreach ($this->reflectionClass->getMethods() as $method) {
@@ -334,7 +334,7 @@ class MethodDocumentationGenerator
         }
     }
 
-    protected function generateMethodsDocumentation(): void
+    private function generateMethodsDocumentation(): void
     {
         $this->methodDocumentation = [];
         foreach ($this->methodsToDocument as $methodName => $method) {
@@ -342,7 +342,7 @@ class MethodDocumentationGenerator
         }
     }
 
-    protected function generateMethodDocumentation(ReflectionMethod $method): MarkdownBlock
+    private function generateMethodDocumentation(ReflectionMethod $method): MarkdownBlock
     {
         $phpDoc = PHPDoc::parse($method->getDocComment());
         $examples = $this->examples->getExamplesForMethod($method->getName());
@@ -366,7 +366,7 @@ class MethodDocumentationGenerator
         );
     }
 
-    protected function generateMethodSignature(ReflectionMethod $method, PHPDoc $phpDoc): string
+    private function generateMethodSignature(ReflectionMethod $method, PHPDoc $phpDoc): string
     {
         $signature = "Number::{$method->getName()}(";
         $parameters = [];
@@ -395,7 +395,7 @@ class MethodDocumentationGenerator
         return $signature.': '.$returnType;
     }
 
-    protected function compile(): string
+    private function compile(): string
     {
         $markdown = [];
         foreach ($this->methodDocumentation as $method) {
@@ -414,13 +414,13 @@ class MethodDocumentationGenerator
  * @property-read array<string, string> $params
  * @property-read array<string, string> $extraTags
  */
-class PHPDoc
+final class PHPDoc
 {
-    protected string $comment;
-    protected string $description;
-    protected ?string $returnType = null;
-    protected array $params = [];
-    protected array $extraTags = [];
+    private string $comment;
+    private string $description;
+    private ?string $returnType = null;
+    private array $params = [];
+    private array $extraTags = [];
 
     public static function parse(string $comment): static
     {
@@ -433,7 +433,7 @@ class PHPDoc
         $this->parseTags();
     }
 
-    protected function parseTags(): void
+    private function parseTags(): void
     {
         $lines = explode("\n", $this->comment);
         $description = '';
@@ -479,7 +479,7 @@ class PHPDoc
         return $this->{$name} ?? $this->extraTags[$name] ?? null;
     }
 
-    protected static function stripCommentDirectives(string $comment): string
+    private static function stripCommentDirectives(string $comment): string
     {
         return trim(implode("\n", array_map(function (string $line): string {
             return trim(str_replace(['*', '/'], '', $line));
@@ -488,9 +488,9 @@ class PHPDoc
 }
 
 /** Parses the examples returned by the examples function to a more usable format */
-class ExampleParser
+final class ExampleParser
 {
-    protected array $examples;
+    private array $examples;
 
     /** @param array $examples Array of the return values */
     public function __construct(array $examples)
@@ -505,7 +505,7 @@ class ExampleParser
         });
     }
 
-    protected function parseExamples(array $input): array
+    private function parseExamples(array $input): array
     {
         $contents = explode("\n", file_get_contents(__FILE__));
         $functionCallLine = debug_backtrace()[1]['line'] - count($input);
@@ -521,7 +521,7 @@ class ExampleParser
 }
 
 /** Represents a method example */
-class Example implements Stringable
+final class Example implements Stringable
 {
     public readonly string $source;
     public readonly string $result;
