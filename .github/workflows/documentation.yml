@@ -1,0 +1,34 @@
+name: Build and Deploy Documentation
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-documentation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: https://git.desilva.se/number-docs
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate Documentation
+        run: |
+          mkdir hyde
+          echo 'output_directories:
+            \Hyde\Pages\DocumentationPage::class: ""' > hyde.yml
+          php ./.github/docs/doc-gen.php --output hyde/_docs/index.md
+
+      - name: Build and Deploy HydePHP Site
+        uses: hydephp/action@master
+        with:
+          deploy-to: pages
+          env-torchlight-token: ${{ secrets.TORCHLIGHT_TOKEN }}
+          env-site-name: "'Friends of PHP'"
+          directory: hyde
