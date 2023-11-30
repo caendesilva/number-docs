@@ -28,7 +28,8 @@ jobs:
       - name: Build and Deploy HydePHP Site
         uses: hydephp/action@master
         with:
-          deploy-to: pages
+          #deploy-to: pages
+          deploy-to: artifact
           env-torchlight-token: ${{ secrets.TORCHLIGHT_TOKEN }}
           env-site-name: "'Friends of PHP'"
           directory: hyde
