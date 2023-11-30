@@ -16,11 +16,13 @@ class DocumentationGenerator
     protected readonly ReadmeData $readme;
     protected readonly array $composerData;
 
+    protected array $frontMatter = [];
     protected array $markdownSections = [];
     protected string $markdown;
 
     public function generate(): void
     {
+        $this->frontMatter = frontMatter();
         $this->loadAndParseReadmeData();
         $this->loadAndParseComposerData();
         $this->assembleDocument();
@@ -29,7 +31,14 @@ class DocumentationGenerator
 
     public function getMarkdown(): string
     {
-        return $this->markdown;
+        $frontMatter = empty($this->frontMatter) ? '' : sprintf(
+            "---\n%s\n---\n\n",
+            implode("\n", array_map(function (string $key, string $value): string {
+                return "$key: $value";
+            }, array_keys($this->frontMatter), $this->frontMatter))
+        );
+
+        return $frontMatter . $this->markdown;
     }
 
     protected function loadAndParseReadmeData(): void
@@ -552,6 +561,13 @@ function examples(): ExampleParser
         Number::fileSize(1024),
         Number::forHumans(1234567.89),
     ]);
+}
+
+function frontMatter(): array
+{
+    return [
+        'title' => 'Documentation',
+    ];
 }
 
 // Run the generator
