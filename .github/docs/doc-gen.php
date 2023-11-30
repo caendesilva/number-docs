@@ -474,11 +474,6 @@ class PHPDoc
         }
     }
 
-    public function getTags(): array
-    {
-        return $this->extraTags;
-    }
-
     public function __get(string $name): null|string|array
     {
         return $this->{$name} ?? $this->extraTags[$name] ?? null;
