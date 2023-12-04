@@ -1,6 +1,6 @@
 hyde:
     output_directories:
-        Hyde\Pages\DocumentationPage: ''
+        documentation-page: ''
     load_app_styles_from_cdn: true
     pretty_urls: true
 
@@ -9,4 +9,4 @@ docs:
         header: 'PHP Number Utility'
         footer: '[GitHub Source Code](https://github.com/FriendsOfPHP/number)'
     table_of_contents:
-      max_heading_level: 3
+        max_heading_level: 3

@@ -576,6 +576,7 @@ $generator = new DocumentationGenerator(new FrontMatter([
     Number::currency(1234.56, 'EUR'),
     Number::fileSize(1024),
     Number::forHumans(1234567.89),
+    Number::abbreviate(100000),
 ]));
 
 $generator->generate();
